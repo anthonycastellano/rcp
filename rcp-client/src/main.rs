@@ -2,6 +2,7 @@ use std::env;
 use std::process::exit;
 use std::path::Path;
 use std::fs::File;
+use std::io::Read;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -21,9 +22,22 @@ fn main() {
         exit(1);
     }
 
-    // read file into memory
-    let mut file = File::open(src_file).unwrap();
-    let mut file_buffer: Vec<u8> = Vec::new();
+    // set up file
+    let mut file = match File::open(file_path) {
+        Ok(file) => file,
+        Err(_) => panic!("Failed to open the file."),
+    };
 
-    println!("Sending {}...", file_path)
+    // read file into memory
+    let mut file_buffer = Vec::new();
+    match file.read_to_end(&mut file_buffer) {
+        Ok(_) => {
+            println!("File content: {:?}", file_buffer);
+        }
+        Err(_) => panic!("Failed to read the file."),
+    }
+
+    println!("Sending {}...", file_path);
+
+    // create connection
 }
