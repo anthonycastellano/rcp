@@ -3,6 +3,7 @@ use std::process::exit;
 use std::path::Path;
 use std::fs::File;
 use std::io::Read;
+use std::net::TcpStream;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -37,7 +38,26 @@ fn main() {
         Err(_) => panic!("Failed to read the file."),
     }
 
-    println!("Sending {}...", file_path);
-
+    // parse host, port, path
+    let target_host: CopyTarget = CopyTarget::new(dest);
+    println!("{:?}", target_host);
+    
     // create connection
+    // let mut stream = TcpStream::connect("127.0.0.1:34254").unwrap();
+
+    println!("Sending {}...", file_path);
+}
+
+// TOOD: put this in separate file
+#[derive(Debug)]
+struct CopyTarget {
+    host: String,
+    path: String 
+}
+
+impl CopyTarget {
+    fn new(target_string: &String) -> CopyTarget {
+
+        CopyTarget { host: String::from(""), path: String::from("") }
+    }
 }
