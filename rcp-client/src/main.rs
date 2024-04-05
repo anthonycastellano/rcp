@@ -49,7 +49,6 @@ fn main() {
 
     // parse host, path
     let target_host: CopyTarget = CopyTarget::new(dest);
-    println!("{:?}", target_host);
     
     // create connection
     let mut stream = match TcpStream::connect(format!("{}:{}", target_host.host, PORT)) {
