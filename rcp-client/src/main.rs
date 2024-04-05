@@ -3,7 +3,10 @@ use std::process::exit;
 use std::path::Path;
 use std::fs::File;
 use std::io::Read;
+use std::io::Write;
 use std::net::TcpStream;
+
+const PORT: u16 = 5050;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -49,9 +52,16 @@ fn main() {
     println!("{:?}", target_host);
     
     // create connection
-    // let mut stream = TcpStream::connect("127.0.0.1:34254").unwrap();
-
+    let mut stream = TcpStream::connect(format!("{}:{}", target_host.host, PORT)).unwrap();
     println!("Sending {}...", file_path);
+    match stream.write(&file_buffer) {
+        Ok(_) => println!("File transfer complete."),
+        Err(_) => {
+            println!("Error: File transfer failed");
+            exit(1);
+        },
+    }
+
 }
 
 // TOOD: put this in separate file
