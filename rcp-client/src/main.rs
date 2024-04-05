@@ -1,3 +1,5 @@
+mod copy_target;
+
 use std::env;
 use std::process::exit;
 use std::path::Path;
@@ -5,6 +7,7 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 use std::net::TcpStream;
+use copy_target::CopyTarget;
 
 const PORT: u16 = 5050;
 
@@ -68,23 +71,4 @@ fn main() {
         },
     };
 
-}
-
-// TOOD: put this in separate file
-#[derive(Debug)]
-struct CopyTarget<'a> {
-    host: &'a str,
-    path: &'a str, 
-}
-
-impl<'a> CopyTarget<'a> {
-    fn new(target_string: &String) -> CopyTarget {
-        let split_target_string: Vec<&str> = target_string.split(':').collect();
-        if split_target_string.len() != 2 {
-            println!("Error: Malformed destination");
-            exit(1);
-        }
-
-        CopyTarget { host: split_target_string[0], path: split_target_string[1] }
-    }
 }
