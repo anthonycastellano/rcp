@@ -52,7 +52,14 @@ fn main() {
     println!("{:?}", target_host);
     
     // create connection
-    let mut stream = TcpStream::connect(format!("{}:{}", target_host.host, PORT)).unwrap();
+    let mut stream = match TcpStream::connect(format!("{}:{}", target_host.host, PORT)) {
+        Ok(stream) => stream,
+        Err(_) => {
+            println!("Error: Could not connect to target host");
+            exit(1);
+        },
+    };
+
     println!("Sending {}...", file_path);
     match stream.write(&file_buffer) {
         Ok(_) => println!("File transfer complete."),
@@ -60,7 +67,7 @@ fn main() {
             println!("Error: File transfer failed");
             exit(1);
         },
-    }
+    };
 
 }
 
