@@ -4,8 +4,7 @@ use std::env;
 use std::process::exit;
 use std::path::Path;
 use std::fs::File;
-use std::io::Read;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::net::TcpStream;
 use copy_target::CopyTarget;
 
