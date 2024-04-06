@@ -24,13 +24,15 @@ impl<'a> Server<'a> {
             },
         };
 
-        loop {
-            match listener.accept() {
-                Ok((mut stream, _)) => {
-                    println!("{:?}", stream);
+        for stream in listener.incoming() {
+            let current_stream: TcpStream = match stream {
+                Ok(s) => s,
+                Err(_) => {
+                    continue;
                 },
-                Err(e) => println!("Failed to establish connection: {}", e),
             };
+
+            println!("New connection from {}", current_stream.peer_addr().unwrap())
         }
     }
 }
