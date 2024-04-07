@@ -4,11 +4,12 @@ use std::env;
 use std::process::exit;
 use std::path::Path;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{BufReader, Read, Write};
 use std::net::TcpStream;
 use copy_target::CopyTarget;
 
 const PORT: u16 = 5050;
+const ACK_BITS: u8 = 0x69;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -56,7 +57,7 @@ fn main() {
     let mut stream = match TcpStream::connect(format!("{}:{}", target_host.host, PORT)) {
         Ok(stream) => stream,
         Err(_) => {
-            println!("Error: Could not connect to target host");
+            println!("Error: Could not connect to target host.");
             exit(1);
         },
     };
@@ -65,7 +66,23 @@ fn main() {
     
     // send file path
     stream.write(target_host.path.as_bytes()).unwrap(); 
+    stream.write(&[0x03]).unwrap();
     stream.flush().unwrap();
+
+    // wait for path acknowledgement
+    let mut path_response: [u8; 2] = [0; 2];
+    match stream.read_exact(&mut path_response) {
+        Ok(_) => (),
+        Err(_) => {
+            println!("Error: Invalid response from server.");
+            exit(1);
+        },
+    }
+    if path_response[0] != ACK_BITS || path_response[1] == 0x00 {
+        println!("Error: Server rejected target path.");
+        exit(1);
+    }
+    println!("This is good");
 
     // send file size
     // stream.write(&[file_buffer.len() as u8]).unwrap();

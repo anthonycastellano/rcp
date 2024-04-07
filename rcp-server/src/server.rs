@@ -1,7 +1,7 @@
 use std::net::{TcpListener, TcpStream};
 use std::process::exit;
-use std::io::Read;
-use std::thread;
+use std::io::{Read, Write};
+use std::thread::{self, current};
 use std::io::{BufReader, BufRead};
 
 const DEFAULT_IFACE: &str = "0.0.0.0";
@@ -38,7 +38,8 @@ impl<'a> Server<'a> {
 
                 println!("New connection from {}", current_stream.peer_addr().unwrap());
 
-                let mut packet = BufReader::new(&current_stream);
+                // get target path
+                let mut packet: BufReader<&TcpStream> = BufReader::new(&current_stream);
                 let mut target_path_bytes: Vec<u8> = Vec::new();
                 let mut target_path: String;
                 match packet.read_until(0x03, &mut target_path_bytes) {
@@ -52,14 +53,16 @@ impl<'a> Server<'a> {
                         };
                         println!("Successfully read target path ({} bytes): {}", bytes, target_path);
                     },
-                    Err(_) => {
-                        return
-                    },
-                }
-                // current_stream.read_to_string(&mut target_path).unwrap(); 
-                // println!("Target path for transfer: {}", target_path);
+                    Err(_) => return,
+                };
+
+                // validate path
+                let temp_res: [u8; 2] = [0x69, 0x01];
+                current_stream.write(&temp_res).unwrap();
+                current_stream.flush().unwrap();
+
+                // get file size
             });
-            
         }
     }
 }
