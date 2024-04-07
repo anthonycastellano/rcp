@@ -2,7 +2,7 @@ use std::net::{TcpListener, TcpStream};
 use std::process::exit;
 use std::io::Read;
 use std::thread;
-use std::str;
+use std::io::{BufReader, BufRead};
 
 const DEFAULT_IFACE: &str = "0.0.0.0";
 
@@ -38,9 +38,26 @@ impl<'a> Server<'a> {
 
                 println!("New connection from {}", current_stream.peer_addr().unwrap());
 
-                let mut target_path: Vec<u8> = Vec::new();
-                current_stream.read_to_end(&mut target_path).unwrap(); 
-                println!("{:?}", String::from_utf8_lossy(&target_path));
+                let mut packet = BufReader::new(&current_stream);
+                let mut target_path_bytes: Vec<u8> = Vec::new();
+                let mut target_path: String;
+                match packet.read_until(0x03, &mut target_path_bytes) {
+                    Ok(bytes) => {
+                        target_path = match String::from_utf8(target_path_bytes) {
+                            Ok(str) => str,
+                            Err(_) => {
+                                println!("Error: Target path is not a valid string");
+                                return
+                            },
+                        };
+                        println!("Successfully read target path ({} bytes): {}", bytes, target_path);
+                    },
+                    Err(_) => {
+                        return
+                    },
+                }
+                // current_stream.read_to_string(&mut target_path).unwrap(); 
+                // println!("Target path for transfer: {}", target_path);
             });
             
         }

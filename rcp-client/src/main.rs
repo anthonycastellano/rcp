@@ -65,9 +65,11 @@ fn main() {
     
     // send file path
     stream.write(target_host.path.as_bytes()).unwrap(); 
-    
+    stream.flush().unwrap();
+
     // send file size
-    stream.write(&[file_buffer.len() as u8]).unwrap();
+    // stream.write(&[file_buffer.len() as u8]).unwrap();
+    // stream.flush().unwrap();
     
     // send file
     // match stream.write(&file_buffer) {
