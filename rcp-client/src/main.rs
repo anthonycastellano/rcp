@@ -62,12 +62,20 @@ fn main() {
     };
 
     println!("Sending {}...", file_path);
-    match stream.write(&file_buffer) {
-        Ok(_) => println!("File transfer complete."),
-        Err(_) => {
-            println!("Error: File transfer failed");
-            exit(1);
-        },
-    };
+    
+    // send file path
+    stream.write(target_host.path.as_bytes()).unwrap(); 
+    
+    // send file size
+    stream.write(&[file_buffer.len() as u8]).unwrap();
+    
+    // send file
+    // match stream.write(&file_buffer) {
+    //     Ok(_) => println!("File transfer complete."),
+    //     Err(_) => {
+    //         println!("Error: File transfer failed");
+    //         exit(1);
+    //     },
+    // };
 
 }
