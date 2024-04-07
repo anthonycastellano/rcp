@@ -65,6 +65,15 @@ impl<'a> Server<'a> {
                 target_path.remove(target_path.len() - 1); // remove stop char
 
                 // validate path
+                let mut valid_path: bool = true;
+                match target_path.chars().nth(0) {
+                    Some(c) => {
+
+                    },
+                    None => {
+
+                    },
+                };
                 let temp_res: [u8; ACK_SIZE] = [ACK_FLAG_BYTE, ACK_VALID_BYTE];
                 current_stream.write(&temp_res).unwrap();
                 current_stream.flush().unwrap();
