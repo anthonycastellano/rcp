@@ -95,7 +95,7 @@ fn main() {
     
     // send file
     match stream.write(&file_buffer) {
-        Ok(_) => println!("File transfer complete."),
+        Ok(_) => (),
         Err(_) => {
             println!("Error: File transfer failed");
             exit(1);
@@ -103,4 +103,5 @@ fn main() {
     };
     stream.flush().unwrap();
 
+    print!("File transfer complete.");
 }

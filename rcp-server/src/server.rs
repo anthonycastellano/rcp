@@ -1,7 +1,9 @@
 use std::net::{TcpListener, TcpStream};
 use std::process::exit;
 use std::io::{Read, Write};
-use std::thread::{self, current};
+use std::fs;
+use std::fs::File;
+use std::thread;
 use std::io::{BufReader, BufRead};
 
 const DEFAULT_IFACE: &str = "0.0.0.0";
@@ -60,6 +62,7 @@ impl<'a> Server<'a> {
                     },
                     Err(_) => return,
                 };
+                target_path.remove(target_path.len() - 1); // remove stop char
 
                 // validate path
                 let temp_res: [u8; ACK_SIZE] = [ACK_FLAG_BYTE, ACK_VALID_BYTE];
@@ -86,7 +89,24 @@ impl<'a> Server<'a> {
                         return
                     },
                 }
-                println!("{:?}", file_buf);
+
+                // write file
+                let mut file: File = match fs::OpenOptions::new().create(true).write(true).open(&target_path) {
+                    Ok(f) => f,
+                    Err(e) => {
+                        println!("Error while opening file for writing: {}", e);
+                        return
+                    },
+                };
+                match file.write_all(&file_buf) {
+                    Ok(_) => {
+                        println!("File created at {}", target_path);
+                    },
+                    Err(e) => {
+                        println!("Error while writing file: {}", e);
+                        return
+                    },
+                };
             });
         }
     }
