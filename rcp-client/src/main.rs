@@ -9,7 +9,11 @@ use std::net::TcpStream;
 use copy_target::CopyTarget;
 
 const PORT: u16 = 5050;
-const ACK_BITS: u8 = 0x69;
+const ACK_SIZE: usize = 2;
+const ACK_FLAG_BYTE: u8 = 0x69;
+const ACK_VALID_BYTE: u8 = 0x01;
+const ACK_INVALID_BYTE: u8 = 0x00;
+const NEWLINE_BYTE: u8 = 0x03;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -66,11 +70,11 @@ fn main() {
     
     // send file path
     stream.write(target_host.path.as_bytes()).unwrap(); 
-    stream.write(&[0x03]).unwrap();
+    stream.write(&[NEWLINE_BYTE]).unwrap();
     stream.flush().unwrap();
 
     // wait for path acknowledgement
-    let mut path_response: [u8; 2] = [0; 2];
+    let mut path_response: [u8; ACK_SIZE] = [0; ACK_SIZE];
     match stream.read_exact(&mut path_response) {
         Ok(_) => (),
         Err(_) => {
@@ -78,7 +82,7 @@ fn main() {
             exit(1);
         },
     }
-    if path_response[0] != ACK_BITS || path_response[1] == 0x00 {
+    if path_response[0] != ACK_FLAG_BYTE || path_response[1] == ACK_INVALID_BYTE {
         println!("Error: Server rejected target path.");
         exit(1);
     }

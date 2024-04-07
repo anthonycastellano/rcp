@@ -5,6 +5,11 @@ use std::thread::{self, current};
 use std::io::{BufReader, BufRead};
 
 const DEFAULT_IFACE: &str = "0.0.0.0";
+const ACK_SIZE: usize = 2;
+const ACK_FLAG_BYTE: u8 = 0x69;
+const ACK_VALID_BYTE: u8 = 0x01;
+const ACK_INVALID_BYTE: u8 = 0x00;
+const NEWLINE_BYTE: u8 = 0x03;
 
 pub struct Server<'a> {
     iface: &'a str,
@@ -42,7 +47,7 @@ impl<'a> Server<'a> {
                 let mut packet: BufReader<&TcpStream> = BufReader::new(&current_stream);
                 let mut target_path_bytes: Vec<u8> = Vec::new();
                 let mut target_path: String;
-                match packet.read_until(0x03, &mut target_path_bytes) {
+                match packet.read_until(NEWLINE_BYTE, &mut target_path_bytes) {
                     Ok(bytes) => {
                         target_path = match String::from_utf8(target_path_bytes) {
                             Ok(str) => str,
@@ -57,7 +62,7 @@ impl<'a> Server<'a> {
                 };
 
                 // validate path
-                let temp_res: [u8; 2] = [0x69, 0x01];
+                let temp_res: [u8; ACK_SIZE] = [ACK_FLAG_BYTE, ACK_VALID_BYTE];
                 current_stream.write(&temp_res).unwrap();
                 current_stream.flush().unwrap();
 
