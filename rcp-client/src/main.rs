@@ -86,11 +86,12 @@ fn main() {
         println!("Error: Server rejected target path.");
         exit(1);
     }
-    println!("This is good");
 
     // send file size
-    // stream.write(&[file_buffer.len() as u8]).unwrap();
-    // stream.flush().unwrap();
+    let file_buffer_size: u64 = file_buffer.len() as u64;
+    let file_buffer_size_buf: [u8; 8] = file_buffer_size.to_be_bytes();
+    stream.write(&file_buffer_size_buf).unwrap();
+    stream.flush().unwrap();
     
     // send file
     // match stream.write(&file_buffer) {

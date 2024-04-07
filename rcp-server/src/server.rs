@@ -67,6 +67,16 @@ impl<'a> Server<'a> {
                 current_stream.flush().unwrap();
 
                 // get file size
+                let mut file_size_bytes: [u8; 8] = [0; 8];
+                let mut file_size: u64;
+                packet = BufReader::new(&current_stream);
+                match packet.read_exact(&mut file_size_bytes) {
+                    Ok(_) => {
+                        file_size = u64::from_be_bytes(file_size_bytes);
+                    },
+                    Err(_) => return,
+                };
+                println!("File size: {}", file_size);
             });
         }
     }
