@@ -69,14 +69,24 @@ impl<'a> Server<'a> {
                 // get file size
                 let mut file_size_bytes: [u8; 8] = [0; 8];
                 let mut file_size: u64;
-                packet = BufReader::new(&current_stream);
-                match packet.read_exact(&mut file_size_bytes) {
+                match current_stream.read_exact(&mut file_size_bytes) {
                     Ok(_) => {
                         file_size = u64::from_be_bytes(file_size_bytes);
                     },
                     Err(_) => return,
                 };
                 println!("File size: {}", file_size);
+
+                // get file
+                let mut file_buf: Vec<u8> = vec![0; file_size as usize];
+                match current_stream.read_exact(&mut file_buf) {
+                    Ok(_) => (),
+                    Err(_) => {
+                        println!("Error: Error occurred during file transfer.");
+                        return
+                    },
+                }
+                println!("{:?}", file_buf);
             });
         }
     }

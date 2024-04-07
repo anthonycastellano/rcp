@@ -94,12 +94,13 @@ fn main() {
     stream.flush().unwrap();
     
     // send file
-    // match stream.write(&file_buffer) {
-    //     Ok(_) => println!("File transfer complete."),
-    //     Err(_) => {
-    //         println!("Error: File transfer failed");
-    //         exit(1);
-    //     },
-    // };
+    match stream.write(&file_buffer) {
+        Ok(_) => println!("File transfer complete."),
+        Err(_) => {
+            println!("Error: File transfer failed");
+            exit(1);
+        },
+    };
+    stream.flush().unwrap();
 
 }
