@@ -55,7 +55,7 @@ fn main() {
     }
 
     // parse host, path
-    let target_host: CopyTarget = CopyTarget::new(dest);
+    let mut target_host: CopyTarget = CopyTarget::new(dest);
     
     // create connection
     let mut stream = match TcpStream::connect(format!("{}:{}", target_host.host, PORT)) {
@@ -68,6 +68,12 @@ fn main() {
 
     println!("Sending {}...", file_path);
     
+    // if target path is empty, just use local file name
+    if target_host.path.len() == 0 {
+        let split_file_path: Vec<&str> = file_path.split('/').collect();
+        let file_name: &str = &split_file_path[split_file_path.len() - 1];
+        target_host.path = file_name;
+    }
     // send file path
     stream.write(target_host.path.as_bytes()).unwrap(); 
     stream.write(&[NEWLINE_BYTE]).unwrap();
@@ -103,5 +109,5 @@ fn main() {
     };
     stream.flush().unwrap();
 
-    print!("File transfer complete.");
+    print!("File transfer complete.\n");
 }
