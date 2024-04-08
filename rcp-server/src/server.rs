@@ -12,6 +12,7 @@ const ACK_FLAG_BYTE: u8 = 0x69;
 const ACK_VALID_BYTE: u8 = 0x01;
 const ACK_INVALID_BYTE: u8 = 0x00;
 const NEWLINE_BYTE: u8 = 0x03;
+const INVALID_PATH_FIRST_CHARS: [&str; 3] = ["/", "~", "."];
 
 pub struct Server<'a> {
     iface: &'a str,
@@ -68,15 +69,27 @@ impl<'a> Server<'a> {
                 let mut valid_path: bool = true;
                 match target_path.chars().nth(0) {
                     Some(c) => {
-
+                        if INVALID_PATH_FIRST_CHARS.contains(&&c.to_string()[0..1]) {
+                            println!("Error: Invalid target path.");
+                            valid_path = false;
+                        }
                     },
                     None => {
-
+                        println!("Error: Target path is empty (somehow).");
+                        valid_path = false;
                     },
                 };
-                let temp_res: [u8; ACK_SIZE] = [ACK_FLAG_BYTE, ACK_VALID_BYTE];
-                current_stream.write(&temp_res).unwrap();
+                let mut ack_bytes: [u8; ACK_SIZE];
+                if valid_path {
+                    ack_bytes = [ACK_FLAG_BYTE, ACK_VALID_BYTE];
+                } else {
+                    ack_bytes = [ACK_FLAG_BYTE, ACK_INVALID_BYTE];
+                }
+                current_stream.write(&ack_bytes).unwrap();
                 current_stream.flush().unwrap();
+                if !valid_path {
+                    return
+                }
 
                 // get file size
                 let mut file_size_bytes: [u8; 8] = [0; 8];
