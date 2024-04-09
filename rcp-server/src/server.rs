@@ -5,6 +5,7 @@ use std::fs;
 use std::fs::File;
 use std::thread;
 use std::io::{BufReader, BufRead};
+use regex::Regex;
 
 const DEFAULT_IFACE: &str = "0.0.0.0";
 const ACK_SIZE: usize = 2;
@@ -66,20 +67,9 @@ impl<'a> Server<'a> {
                 target_path.remove(target_path.len() - 1); // remove stop char
 
                 // validate path
-                let mut valid_path: bool = true;
-                match target_path.chars().nth(0) {
-                    Some(c) => {
-                        if INVALID_PATH_FIRST_CHARS.contains(&&c.to_string()[0..1]) {
-                            println!("Error: Invalid target path.");
-                            valid_path = false;
-                        }
-                    },
-                    None => {
-                        println!("Error: Target path is empty (somehow).");
-                        valid_path = false;
-                    },
-                };
-                let mut ack_bytes: [u8; ACK_SIZE];
+                let valid_path_re: Regex = Regex::new(r"^([a-zA-Z-_]*\.[a-z]+)+$").unwrap();
+                let valid_path: bool = valid_path_re.is_match(&target_path);
+                let ack_bytes: [u8; ACK_SIZE];
                 if valid_path {
                     ack_bytes = [ACK_FLAG_BYTE, ACK_VALID_BYTE];
                 } else {
