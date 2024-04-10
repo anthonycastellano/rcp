@@ -14,6 +14,7 @@ const ACK_FLAG_BYTE: u8 = 0x69;
 const ACK_VALID_BYTE: u8 = 0x01;
 const ACK_INVALID_BYTE: u8 = 0x00;
 const NEWLINE_BYTE: u8 = 0x03;
+const FILE_PARTITION_SIZE: u64 = 1000000; // 10MB
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -98,8 +99,14 @@ fn main() {
     let file_buffer_size_buf: [u8; 8] = file_buffer_size.to_be_bytes();
     stream.write(&file_buffer_size_buf).unwrap();
     stream.flush().unwrap();
+
+    // send partition amount
+    let file_buffer_partitions: u64 = file_buffer.len() as u64 / FILE_PARTITION_SIZE;
+    let file_buffer_partitions_buf: [u8; 8] = file_buffer_partitions.to_be_bytes();
+    stream.write(&file_buffer_partitions_buf).unwrap();
+    stream.flush().unwrap();
     
-    // send file
+    // break file into chunks and send file
     match stream.write(&file_buffer) {
         Ok(_) => (),
         Err(_) => {

@@ -3,7 +3,7 @@ use std::process::exit;
 use std::io::{Read, Write};
 use std::fs;
 use std::fs::File;
-use std::thread;
+use std::thread::{self, current};
 use std::io::{BufReader, BufRead};
 use regex::Regex;
 
@@ -91,6 +91,17 @@ impl<'a> Server<'a> {
                     Err(_) => return,
                 };
                 println!("File size: {}", file_size);
+
+                // get partition count
+                let mut file_partitions_bytes: [u8; 8] = [0; 8];
+                let mut file_partitions: u64;
+                match current_stream.read_exact(&mut file_partitions_bytes) {
+                    Ok(_) => {
+                        file_partitions = u64::from_be_bytes(file_partitions_bytes);
+                    },
+                    Err(_) => return,
+                };
+                println!("File partitions: {}", file_partitions);
 
                 // get file
                 let mut file_buf: Vec<u8> = vec![0; file_size as usize];
