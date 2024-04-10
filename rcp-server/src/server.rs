@@ -13,7 +13,7 @@ const ACK_FLAG_BYTE: u8 = 0x69;
 const ACK_VALID_BYTE: u8 = 0x01;
 const ACK_INVALID_BYTE: u8 = 0x00;
 const NEWLINE_BYTE: u8 = 0x03;
-const INVALID_PATH_FIRST_CHARS: [&str; 3] = ["/", "~", "."];
+const FILE_REGEX: &str = r"^([a-zA-Z-_]*\.[a-z]+)+$";
 
 pub struct Server<'a> {
     iface: &'a str,
@@ -67,7 +67,7 @@ impl<'a> Server<'a> {
                 target_path.remove(target_path.len() - 1); // remove stop char
 
                 // validate path
-                let valid_path_re: Regex = Regex::new(r"^([a-zA-Z-_]*\.[a-z]+)+$").unwrap();
+                let valid_path_re: Regex = Regex::new(FILE_REGEX).unwrap();
                 let valid_path: bool = valid_path_re.is_match(&target_path);
                 let ack_bytes: [u8; ACK_SIZE];
                 if valid_path {
